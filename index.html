@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arjun Singh - Developer</title>
+    <!-- Add Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <!-- Add Locomotive Scroll CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.css">
+    <style>
+        /* Basic Styles */
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            /* Hide default cursor and scrollbar */
+            cursor: none;
+            overflow-x: hidden; /* Prevent horizontal scrollbar from GSAP */
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 25px;
+            height: 25px;
+            background-color: white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: transform 0.2s ease-out;
+            z-index: 10001; 
+            top: 0; 
+            left: 0; 
+            mix-blend-mode: difference;
+        }
+
+        .cursor-grow {
+            transform: translate(-50%, -50%) scale(2.5);
+        }
+        
+        /* Preloader */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
+        }
+
+        .loader-circle {
+            width: 150px;
+            height: 150px;
+            border: 2px solid #444;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .loader-logo {
+            width: 50px;
+            height: 50px;
+            background-image: url('https://placehold.co/50x50/121212/E0E0E0?text=^_^');
+            background-size: cover;
+            border-radius: 50%;
+        }
+        
+        #loader-percentage {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        
+        #start-button {
+            background: none;
+            border: 1px solid #E0E0E0;
+            color: #E0E0E0;
+            padding: 10px 30px;
+            font-size: 1em;
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 25px;
+            cursor: none;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            position: fixed;
+            width: calc(100% - 100px);
+            z-index: 100;
+            top: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+             width: 50px;
+            height: 50px;
+            background-image: url('https://placehold.co/50x50/121212/E0E0E0?text=^_^');
+            background-size: cover;
+            border-radius: 50%;
+        }
+        
+        .social-links {
+            display: flex;
+            align-items: center;
+            margin-left: 30px;
+        }
+        
+        .social-links a {
+            margin-right: 20px;
+        }
+        
+        .social-links svg {
+            width: 24px;
+            height: 24px;
+            fill: #E0E0E0;
+            transition: fill 0.3s;
+        }
+        
+        .social-links a:hover svg {
+            fill: #FF5733;
+        }
+
+        nav a {
+            color: #E0E0E0;
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 0.9em;
+            position: relative;
+        }
+
+        /* Main Content Container for Locomotive Scroll */
+        #main-container {
+            position: relative;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; /* Allow for title and content */
+            justify-content: center;
+            align-items: center;
+            padding: 100px 50px;
+            position: relative;
+            width: 100%;
+            box-sizing: border-box; /* Important for layout calculations */
+            overflow: hidden; /* Hide overflow for reveal animations */
+        }
+        
+        /* Hero Section Specifics for 3D Canvas */
+        .hero {
+            padding: 0;
+        }
+        
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .hero .text-wipe-container {
+            z-index: 2; /* Ensure text is on top of canvas */
+        }
+        
+        /* Text Wipe Animation Styles */
+        .section-title {
+            text-transform: uppercase;
+            font-size: 2em;
+            color: #444;
+            margin-bottom: 50px;
+        }
+        
+        .text-wipe-container {
+            position: relative;
+            text-align: center;
+        }
+
+        .text-background, .text-foreground {
+            margin: 0;
+            padding: 0;
+            line-height: 1.1;
+            text-transform: uppercase;
+            font-size: 8em; /* Adjusted for single word */
+        }
+        
+        .about .text-background, .about .text-foreground,
+        .personal-details .text-background, .personal-details .text-foreground,
+        .experience .text-background, .experience .text-foreground,
+        .contact .text-background, .contact .text-foreground {
+            font-size: 2.8em; /* Adjusted for new text */
+            max-width: 950px; /* Adjusted for new text */
+            line-height: 1.4;
+            text-transform: none;
+        }
+
+        .text-background {
+            color: #444;
+        }
+
+        .text-foreground {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: #E0E0E0;
+            clip-path: inset(0 100% 0 0);
+        }
+        
+        .highlight {
+            color: #FF5733;
+        }
+
+        /* "What I Do", "Courses" & "Tech Stack" Section Styles */
+        .what-i-do ul, .courses ul, .tech-stack ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 4em;
+            text-transform: uppercase;
+            width: 100%;
+        }
+
+        .what-i-do li, .courses li, .tech-stack li {
+            padding: 25px 50px;
+            margin: 0 -50px;
+            border-bottom: 1px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .what-i-do li:first-child, .courses li:first-child, .tech-stack li:first-child {
+            border-top: 1px solid #444;
+        }
+        
+        .li-text-wrapper {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .li-content {
+            color: #444;
+        }
+        
+        .courses .li-content {
+            font-size: 0.8em; /* Smaller font for longer course names */
+        }
+
+        .hover-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FF5733;
+            transform: scaleX(0);
+            transform-origin: center;
+            z-index: 1;
+        }
+        
+        .hover-text {
+            font-size: 0.4em;
+            color: #121212;
+            opacity: 0;
+            max-width: 400px;
+            text-align: right;
+            flex-shrink: 0;
+            padding-left: 20px;
+        }
+        
+        /* Tech Stack Specific Styles */
+        .tech-stack .li-content {
+            color: #E0E0E0;
+        }
+        
+        .tech-stack .proficiency-bar-container {
+            width: 40%;
+            height: 8px;
+            background-color: #444;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .tech-stack .proficiency-bar {
+            width: 0%; /* Animated by GSAP */
+            height: 100%;
+            background-color: #FF5733;
+            border-radius: 4px;
+        }
+        
+        /* *** NEW: Image Reveal Section Styles *** */
+        .experience {
+            padding: 0;
+        }
+        
+        .image-reveal-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            /* clip-path will be animated by GSAP */
+            clip-path: circle(0% at 50% 50%);
+        }
+        
+        .experience .text-wipe-container {
+            z-index: 2; /* Keep text on top */
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader-circle">
+            <div class="loader-logo"></div>
+        </div>
+        <div id="loader-percentage">0%</div>
+        <button id="start-button">START</button>
+    </div>
+
+    <!-- Main Container for Locomotive Scroll -->
+    <div id="main-container">
+
+        <!-- Header -->
+        <header data-scroll-section>
+            <div class="header-left">
+                <div class="logo"></div>
+                <div class="social-links">
+                    <a href="https://www.youtube.com/@phonkclub99" target="_blank">
+                        <svg viewBox="0 0 28 28" role="img"><path d="M22.22,8.18a2.68,2.68,0,0,0-1.89-1.89C18.64,5.78,14,5.78,14,5.78s-4.64,0-6.33.51A2.68,2.68,0,0,0,5.78,8.18C5.28,9.87,5.28,14,5.28,14s0,4.13.5,5.82a2.68,2.68,0,0,0,1.89,1.89c1.69.51,6.33.51,6.33.51s4.64,0,6.33-.51a2.68,2.68,0,0,0,1.89-1.89c.51-1.69.51-5.82.51-5.82s0-4.13-.51-5.82Zm-10,8.54V9.28l4.76,2.64Z"></path></svg>
+                    </a>
+                    <a href="https://github.com/arjun2014" target="_blank">
+                        <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"/></svg>
+                    </a>
+                </div>
+            </div>
+            <nav>
+                <a href="#about">ABOUT</a>
+                <a href="#work">WORK</a>
+                <a href="#courses">COURSES</a>
+                <a href="#tech-stack">TECH</a>
+                <a href="#contact">CONTACT</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Hero Section -->
+            <section class="hero" data-scroll-section>
+                <canvas id="hero-canvas"></canvas>
+                <div class="text-wipe-container">
+                    <h1 class="text-background">
+                        ARJUN
+                    </h1>
+                    <h1 class="text-foreground">
+                        ARJUN
+                    </h1>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="about" data-scroll-section>
+                 <div class="text-wipe-container">
+                    <p class="text-background">I build advanced AI systems and digital tools that solve real-world problems. I turn bold ideas into <span class="highlight">powerful, full-scale digital experiences.</span></p>
+                    <p class="text-foreground">I build advanced AI systems and digital tools that solve real-world problems. I turn bold ideas into <span class="highlight">powerful, full-scale digital experiences.</span></p>
+                </div>
+            </section>
+            
+            <!-- Personal Details Section -->
+            <section id="personal-details" class="personal-details" data-scroll-section>
+                 <div class="text-wipe-container">
+                    <p class="text-background">A 12-year-old developer from <span class="highlight">Class 8th Vasudha</span> at Parevartan School, passionate about building the future, one line of code at a time.</p>
+                    <p class="text-foreground">A 12-year-old developer from <span class="highlight">Class 8th Vasudha</span> at Parevartan School, passionate about building the future, one line of code at a time.</p>
+                </div>
+            </section>
+
+            <!-- What I Do Section -->
+            <section id="work" class="what-i-do" data-scroll-section>
+                 <h2 class="section-title">What I Do</h2>
+                 <ul>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">AI Automation</span>
+                            <span class="hover-text">I engineer intelligent systems to streamline complex workflows.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">Full Stack Development</span>
+                            <span class="hover-text">Building robust applications from database to user interface.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">UI/UX Design</span>
+                            <span class="hover-text">Creating intuitive and beautiful user-centered designs.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">Video Editing</span>
+                            <span class="hover-text">Crafting compelling visual narratives through post-production.</span>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+            
+            <!-- Courses Section -->
+            <section id="courses" class="courses" data-scroll-section>
+                <h2 class="section-title">Courses & Certifications</h2>
+                <ul>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">CS50x by Harvard</span>
+                            <span class="hover-text">9 Problem Sets & 1 Final Project - 100% Complete</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">HTML Course by W3Schools</span>
+                            <span class="hover-text">Completed with proficiency</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">CSS Course by W3Schools</span>
+                            <span class="hover-text">Completed with proficiency</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">JS Course by FreeCodeCamp</span>
+                            <span class="hover-text">Completed with proficiency</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">Python Course by Codecademy</span>
+                             <span class="hover-text">Completed with proficiency</span>
+                        </div>
+                    </li>
+                     <li>
+                        <div class="hover-bg"></div>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">React Course on YouTube</span>
+                             <span class="hover-text">Completed with proficiency</span>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+            
+            <!-- Tech Stack Section -->
+            <section id="tech-stack" class="tech-stack" data-scroll-section>
+                <h2 class="section-title">Tech Stack</h2>
+                <ul>
+                    <li>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">HTML</span>
+                            <div class="proficiency-bar-container">
+                                <div class="proficiency-bar" data-proficiency="100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">Python</span>
+                            <div class="proficiency-bar-container">
+                                <div class="proficiency-bar" data-proficiency="90"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">JavaScript</span>
+                            <div class="proficiency-bar-container">
+                                <div class="proficiency-bar" data-proficiency="80"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">React</span>
+                            <div class="proficiency-bar-container">
+                                <div class="proficiency-bar" data-proficiency="60"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="li-text-wrapper">
+                            <span class="li-content">Git</span>
+                            <div class="proficiency-bar-container">
+                                <div class="proficiency-bar" data-proficiency="100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Experience Section 1 -->
+            <section class="experience" data-scroll-section>
+                <div class="image-reveal-container" style="background-image: url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=2020&auto=format&fit=crop');"></div>
+                <div class="text-wipe-container">
+                    <p class="text-background">With a foundation in <span class="highlight">cutting-edge technology</span>, I've led projects that redefine industry standards and deliver tangible results.</p>
+                    <p class="text-foreground">With a foundation in <span class="highlight">cutting-edge technology</span>, I've led projects that redefine industry standards and deliver tangible results.</p>
+                </div>
+            </section>
+            
+            <!-- Experience Section 2 -->
+            <section class="experience" data-scroll-section>
+                 <div class="image-reveal-container" style="background-image: url('https://images.unsplash.com/photo-1639762681057-408e52192e50?q=80&w=1932&auto=format&fit=crop');"></div>
+                <div class="text-wipe-container">
+                    <p class="text-background">My work focuses on collaborating with visionaries to build <span class="highlight">innovative products</span> that captivate and perform.</p>
+                    <p class="text-foreground">My work focuses on collaborating with visionaries to build <span class="highlight">innovative products</span> that captivate and perform.</p>
+                </div>
+            </section>
+            
+            <!-- Contact Section -->
+            <section id="contact" class="contact" data-scroll-section>
+                <div class="text-wipe-container">
+                    <p class="text-background">Have a project in mind? Let's connect. <a href="mailto:contact@thisisarjun.tech" class="highlight">contact@thisisarjun.tech</a></p>
+                    <p class="text-foreground">Have a project in mind? Let's connect. <a href="mailto:contact@thisisarjun.tech" class="highlight">contact@thisisarjun.tech</a></p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Add Libraries: GSAP, ScrollTrigger, Locomotive Scroll -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.min.js"></script>
+    <!-- Add Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        window.onload = function() {
+            
+            // --- 3D HERO SCENE ---
+            function initHeroScene() {
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('hero-canvas'), alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+
+                const geometry = new THREE.IcosahedronGeometry(1.5, 0);
+                const material = new THREE.MeshStandardMaterial({ color: 0xffffff, wireframe: true });
+                const icosahedron = new THREE.Mesh(geometry, material);
+                scene.add(icosahedron);
+
+                const ambientLight = new THREE.AmbientLight(0x404040, 2);
+                scene.add(ambientLight);
+                const pointLight = new THREE.PointLight(0xff5733, 1, 100);
+                pointLight.position.set(5, 5, 5);
+                scene.add(pointLight);
+
+                const particlesGeometry = new THREE.BufferGeometry;
+                const particlesCnt = 5000;
+                const posArray = new Float32Array(particlesCnt * 3);
+                for (let i = 0; i < particlesCnt * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 10;
+                }
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                const particlesMaterial = new THREE.PointsMaterial({ size: 0.005, color: 0xffffff });
+                const particleMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+                scene.add(particleMesh);
+
+                camera.position.z = 5;
+
+                let mouseX = 0;
+                let mouseY = 0;
+                document.addEventListener('mousemove', (event) => {
+                    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+                });
+
+                function animate() {
+                    requestAnimationFrame(animate);
+                    icosahedron.rotation.x += 0.001;
+                    icosahedron.rotation.y += 0.001;
+                    particleMesh.rotation.y += 0.0005;
+                    
+                    camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+                    camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05;
+                    
+                    renderer.render(scene, camera);
+                }
+                animate();
+                
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+
+            // --- GSAP & LOCOMOTIVE SCROLL SETUP ---
+            gsap.registerPlugin(ScrollTrigger);
+
+            const locoScroll = new LocomotiveScroll({
+                el: document.querySelector("#main-container"),
+                smooth: true,
+                lerp: 0.08
+            });
+
+            locoScroll.on("scroll", ScrollTrigger.update);
+
+            ScrollTrigger.scrollerProxy("#main-container", {
+                scrollTop(value) {
+                    return arguments.length ? locoScroll.scrollTo(value, 0, 0) : locoScroll.scroll.instance.scroll.y;
+                },
+                getBoundingClientRect() {
+                    return {top: 0, left: 0, width: window.innerWidth, height: window.innerHeight};
+                },
+                pinType: document.querySelector("#main-container").style.transform ? "transform" : "fixed"
+            });
+            
+            // --- PRELOADER LOGIC ---
+            const preloader = document.getElementById('preloader');
+            const percentageDisplay = document.getElementById('loader-percentage');
+            const startButton = document.getElementById('start-button');
+            let percentage = 0;
+
+            const interval = setInterval(() => {
+                percentage += 1;
+                if (percentage <= 100) {
+                    percentageDisplay.textContent = percentage + '%';
+                } else {
+                    clearInterval(interval);
+                    percentageDisplay.style.display = 'none';
+                    startButton.style.display = 'block';
+                }
+            }, 30);
+            
+            startButton.addEventListener('click', () => {
+                gsap.to(preloader, {
+                    opacity: 0,
+                    duration: 0.8,
+                    onComplete: () => {
+                        preloader.style.display = 'none';
+                        document.body.style.overflow = ''; 
+                        locoScroll.update();
+                        initHeroScene();
+                        gsap.to(".hero .text-foreground", {
+                            clipPath: "inset(0 0% 0 0)",
+                            duration: 1,
+                            ease: "power3.inOut"
+                        });
+                        ScrollTrigger.refresh(); // Refresh ScrollTrigger after everything is loaded
+                    }
+                });
+            });
+
+            // --- CURSOR LOGIC ---
+            const cursor = document.querySelector('.cursor');
+            const linksAndHoverables = document.querySelectorAll('a, button, .what-i-do li, .courses li, .text-wipe-container, .tech-stack li');
+
+            document.addEventListener('mousemove', e => {
+                gsap.to(cursor, { duration: 0.3, x: e.clientX, y: e.clientY, ease: "power3.out" });
+            });
+
+            linksAndHoverables.forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('cursor-grow'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-grow'));
+            });
+
+            // --- GSAP SCROLL-TRIGGERED ANIMATIONS ---
+            const wipeElements = document.querySelectorAll('.text-foreground');
+            wipeElements.forEach(el => {
+                gsap.fromTo(el, 
+                    { clipPath: "inset(0 100% 0 0)" },
+                    {
+                        clipPath: "inset(0 0% 0 0)",
+                        ease: "power3.inOut",
+                        duration: 1.5,
+                        scrollTrigger: {
+                            trigger: el.closest('section'),
+                            scroller: "#main-container",
+                            start: "top 70%",
+                            toggleActions: "play reverse play reverse"
+                        }
+                    }
+                );
+            });
+            
+            // *** NEW: IMAGE REVEAL ANIMATION ***
+            const revealContainers = document.querySelectorAll('.image-reveal-container');
+            revealContainers.forEach(container => {
+                gsap.fromTo(container, 
+                    { clipPath: "circle(0% at 50% 50%)" },
+                    {
+                        clipPath: "circle(75% at 50% 50%)",
+                        ease: "power2.inOut",
+                        scrollTrigger: {
+                            trigger: container.parentElement,
+                            scroller: "#main-container",
+                            start: "top center",
+                            end: "bottom center",
+                            scrub: true
+                        }
+                    }
+                );
+            });
+
+
+            // --- "WHAT I DO" & "COURSES" HOVER ANIMATION ---
+            const hoverListItems = document.querySelectorAll('.what-i-do li, .courses li');
+            hoverListItems.forEach(item => {
+                const bg = item.querySelector('.hover-bg');
+                const content = item.querySelector('.li-content');
+                const hoverText = item.querySelector('.hover-text');
+
+                const tl = gsap.timeline({ paused: true });
+                tl.to(bg, { scaleX: 1, duration: 0.4, ease: 'power2.inOut' })
+                  .to(content, { color: '#121212', duration: 0.4, ease: 'power2.inOut' }, 0)
+                  .to(hoverText, { opacity: 1, duration: 0.4, ease: 'power2.inOut' }, 0.1);
+
+                item.addEventListener('mouseenter', () => tl.play());
+                item.addEventListener('mouseleave', () => tl.reverse());
+            });
+            
+            // --- TECH STACK PROFICIENCY BAR ANIMATION ---
+            const proficiencyBars = document.querySelectorAll('.proficiency-bar');
+            proficiencyBars.forEach(bar => {
+                const proficiency = bar.getAttribute('data-proficiency');
+                gsap.to(bar, {
+                    width: proficiency + '%',
+                    duration: 1.5,
+                    ease: 'power3.inOut',
+                    scrollTrigger: {
+                        trigger: bar.closest('.tech-stack'),
+                        scroller: "#main-container",
+                        start: 'top 60%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+            
+            // --- SMOOTH SCROLL FOR NAV LINKS ---
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        locoScroll.scrollTo(targetElement);
+                    }
+                });
+            });
+            
+            // Final refresh of ScrollTrigger
+            ScrollTrigger.addEventListener("refresh", () => locoScroll.update());
+            ScrollTrigger.refresh();
+
+        };
+    </script>
+</body>
+</html>
